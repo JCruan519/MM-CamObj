@@ -14,6 +14,7 @@
 To use the dataset, download the files and place them in the `dataset/data/` directory. Then, run `dataset/data2json.py` to convert the data into JSON format.
 
 ## Evaluation
+**Make sure to update your API keys and dataset paths accordingly.**
 1. Modify the dataset and model paths in `MM-CamObj/camobjbench/run_eval_batch.sh` to match your local setup.
 2. Execute the following command to start the evaluation:  
    ```bash
@@ -24,5 +25,5 @@ To use the dataset, download the files and place them in the `dataset/data/` dir
    - `MM-CamObj/camobjbench/eval_GPT4o/questions`
    - `MM-CamObj/camobjbench/eval_GPT4o_mini/questions`
 
-   Make sure to update your API keys and dataset paths accordingly.
+   
 
