@@ -20,9 +20,9 @@ To use the dataset, download the files and place them in the `dataset/data/` dir
    bash MM-CamObj/camobjbench/run_eval_batch.sh
    ```
 3. For evaluating with GPT Gemini, run the Python scripts located in the following directories:  
-   - `/cluster/home/user1/ywz/workspace/MM-CamObj/camobjbench/eval_gemini-1.5-pro/questions`
-   - `/cluster/home/user1/ywz/workspace/MM-CamObj/camobjbench/eval_GPT4o/questions`
-   - `/cluster/home/user1/ywz/workspace/MM-CamObj/camobjbench/eval_GPT4o_mini/questions`
+   - `MM-CamObj/camobjbench/eval_gemini-1.5-pro/questions`
+   - `MM-CamObj/camobjbench/eval_GPT4o/questions`
+   - `MM-CamObj/camobjbench/eval_GPT4o_mini/questions`
 
    Make sure to update your API keys and dataset paths accordingly.
 
