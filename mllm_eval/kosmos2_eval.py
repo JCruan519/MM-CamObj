@@ -21,22 +21,7 @@ class Kosmos2():
 
         
     def __call__(self, inputs: List[dict]) -> str:
-        if self.eval_mode.startswith('single_choice'):
-            try:
-                generated_text = self.get_single_choice_anwser(inputs)
-            except:
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('flow_insert'):
-            # try:
-            generated_text = self.get_flow_insert_answer(inputs)
-            # except:
-                # return 'ERROR!!!'
-        elif self.eval_mode.startswith('fake_news'):
-            try:
-                generated_text = self.get_fake_news_answer(inputs)
-            except:
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('easy_VQA'):
+        if self.eval_mode.startswith('easy_VQA'):
             try:
                 generated_text = self.get_VQA_answer(inputs)
             except:
@@ -66,24 +51,9 @@ class Kosmos2():
                 generated_text = self.get_general_answer(inputs)
             except:
                 return 'ERROR!!!'
-        elif self.eval_mode.startswith('location_choice'):
-            try:
-                generated_text = self.get_location_choice_answer(inputs)
-            except:
-                return 'ERROR!!!'
         elif self.eval_mode.startswith('mask_FT'):
             try:
                 generated_text = self.get_mask_FT_answer(inputs)
-            except:
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('size_choice'):
-            try:
-                generated_text = self.get_size_choice_answer(inputs)
-            except:
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('size_compare'):
-            try:
-                generated_text = self.get_size_compare_answer(inputs)
             except:
                 return 'ERROR!!!'
         else:
@@ -91,78 +61,6 @@ class Kosmos2():
         return generated_text
     
 
-    def get_single_choice_anwser(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'above_content':
-                'below_content: 
-                'images': [
-                    
-                ]
-                'temple_img': 
-                'temple_txt': 
-            }
-        """
-        temple_txt = inputs['temple_txt']
-        temple_img = inputs['temple_img']
-        if self.support_multi_image:
-            raise NotImplementedError
-        else:
-            merged_image = merge_images(inputs['images'])
-            text_prompt = temple_txt + inputs['above_content'] + '\n' + inputs['below_content'] + temple_img
-            text_prompt = "<grounding> Question:" + text_prompt +" Answer:"
-            
-            inputs = self.processor(text=text_prompt, images=merged_image, return_tensors="pt")
-            inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
-            generated_ids = self.model.generate(
-                pixel_values=inputs["pixel_values"],
-                input_ids=inputs["input_ids"],
-                attention_mask=inputs["attention_mask"],
-                image_embeds=None,
-                image_embeds_position_mask=inputs["image_embeds_position_mask"],
-                use_cache=True,
-                max_new_tokens=128,
-            )
-            new_generated_ids = generated_ids[:, inputs["input_ids"].shape[1]:]
-            generated_text = self.processor.batch_decode(new_generated_ids, skip_special_tokens=True)[0]
-            return generated_text.strip(" \n")
-
-
-    def get_flow_insert_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'paragraphs': 
-                'image': 
-                'temple_img': 
-                'temple_txt': 
-            }
-        """
-        temple_txt = inputs['temple_txt']
-        temple_img = inputs['temple_img']
-        if self.support_multi_image:
-            raise NotImplementedError
-        else:
-            input_image = load_image(inputs['image'])
-            text_prompt = temple_txt + inputs['paragraphs'] + temple_img
-            text_prompt = "<grounding> Question:" + text_prompt +" Answer:"
-            
-            inputs = self.processor(text=text_prompt, images=input_image, return_tensors="pt")
-            inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
-            generated_ids = self.model.generate(
-                pixel_values=inputs["pixel_values"],
-                input_ids=inputs["input_ids"],
-                attention_mask=inputs["attention_mask"],
-                image_embeds=None,
-                image_embeds_position_mask=inputs["image_embeds_position_mask"],
-                use_cache=True,
-                max_new_tokens=128,
-            )
-            new_generated_ids = generated_ids[:, inputs["input_ids"].shape[1]:]
-            generated_text = self.processor.batch_decode(new_generated_ids, skip_special_tokens=True)[0]
-            return generated_text.strip(" \n")
-                
     def get_VQA_answer(self, inputs: dict) -> str:
         """
         Args:
@@ -232,6 +130,8 @@ class Kosmos2():
             generated_text = self.processor.batch_decode(new_generated_ids, skip_special_tokens=True)[0]
             print(generated_text.strip(" \n"))
             return generated_text.strip(" \n")
+
+
     def get_bbox_answer(self, inputs: dict) -> str:
         """
         Args:
@@ -326,68 +226,9 @@ class Kosmos2():
             new_generated_ids = generated_ids[:, inputs["input_ids"].shape[1]:]
             generated_text = self.processor.batch_decode(new_generated_ids, skip_special_tokens=True)[0]
             return generated_text.strip(" \n")
-    def get_location_choice_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'question': 
-                'image': 
-            }
-        """
-        if self.support_multi_image:
-            raise NotImplementedError
-        else:
-            input_image = load_image(inputs['image'])
-            text_prompt = inputs['question']
-            text_prompt = "<grounding> Question:" + text_prompt +" Answer:"
-            
-            inputs = self.processor(text=text_prompt, images=input_image, return_tensors="pt")
-            inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
-            generated_ids = self.model.generate(
-                pixel_values=inputs["pixel_values"],
-                input_ids=inputs["input_ids"],
-                attention_mask=inputs["attention_mask"],
-                image_embeds=None,
-                image_embeds_position_mask=inputs["image_embeds_position_mask"],
-                use_cache=True,
-                max_new_tokens=128,
-            )
-            new_generated_ids = generated_ids[:, inputs["input_ids"].shape[1]:]
-            generated_text = self.processor.batch_decode(new_generated_ids, skip_special_tokens=True)[0]
-            answer = generated_text.strip(" \n")
-            print(f"answer: {answer}")
-            return generated_text.strip(" \n")
-    def get_size_choice_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'question': 
-                'image': 
-            }
-        """
-        if self.support_multi_image:
-            raise NotImplementedError
-        else:
-            input_image = load_image(inputs['image'])
-            text_prompt = inputs['question']
-            text_prompt = "<grounding> Question:" + text_prompt +" Answer:"
-            
-            inputs = self.processor(text=text_prompt, images=input_image, return_tensors="pt")
-            inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
-            generated_ids = self.model.generate(
-                pixel_values=inputs["pixel_values"],
-                input_ids=inputs["input_ids"],
-                attention_mask=inputs["attention_mask"],
-                image_embeds=None,
-                image_embeds_position_mask=inputs["image_embeds_position_mask"],
-                use_cache=True,
-                max_new_tokens=128,
-            )
-            new_generated_ids = generated_ids[:, inputs["input_ids"].shape[1]:]
-            generated_text = self.processor.batch_decode(new_generated_ids, skip_special_tokens=True)[0]
-            answer = generated_text.strip(" \n")
-            print(f"answer: {answer}")
-            return generated_text.strip(" \n")
+
+
+   
     def get_mask_FT_answer(self, inputs: dict) -> str:
         """
         Args:
@@ -417,35 +258,7 @@ class Kosmos2():
             new_generated_ids = generated_ids[:, inputs["input_ids"].shape[1]:]
             generated_text = self.processor.batch_decode(new_generated_ids, skip_special_tokens=True)[0]
             return generated_text.strip(" \n")
-    def get_size_compare_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'question': 
-                'image_list': 
-            }
-        """
-        if self.support_multi_image:
-            raise NotImplementedError
-        else:
-            merged_image = merge_images(inputs['image_list'])
-            text_prompt = inputs['question']
-            text_prompt = "<grounding> Question:" + text_prompt +" Answer:"
-            
-            inputs = self.processor(text=text_prompt, images=merged_image, return_tensors="pt")
-            inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
-            generated_ids = self.model.generate(
-                pixel_values=inputs["pixel_values"],
-                input_ids=inputs["input_ids"],
-                attention_mask=inputs["attention_mask"],
-                image_embeds=None,
-                image_embeds_position_mask=inputs["image_embeds_position_mask"],
-                use_cache=True,
-                max_new_tokens=128,
-            )
-            new_generated_ids = generated_ids[:, inputs["input_ids"].shape[1]:]
-            generated_text = self.processor.batch_decode(new_generated_ids, skip_special_tokens=True)[0]
-            return generated_text.strip(" \n")
+    
 
     def process_interleaved_example(self, prompt, images, placeholder="<i>", num_image_tokens=64, add_special_tokens=True, add_eos_token=False, return_tensors=None):
         processor = self.processor

@@ -24,22 +24,7 @@ class INSTRUCTBLIP_FLANT5():
         self.eval_mode = eval_mode
     
     def __call__(self, inputs: dict) -> str:
-        if self.eval_mode.startswith('single_choice'):
-            try:
-                generated_text = self.get_single_choice_anwser(inputs)
-            except:
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('flow_insert'):
-            try:
-                generated_text = self.get_flow_insert_answer(inputs)
-            except:
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('fake_news'):
-            try:
-                generated_text = self.get_fake_news_answer(inputs)
-            except:
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('easy_VQA'):
+        if self.eval_mode.startswith('easy_VQA'):
             try:
                 generated_text = self.get_VQA_answer(inputs)
             except:
@@ -66,21 +51,6 @@ class INSTRUCTBLIP_FLANT5():
                 generated_text = self.get_mask_match_answer(inputs)
             except:
                 return 'ERROR!!!'
-        elif self.eval_mode.startswith('size_compare'):
-            try:
-                generated_text = self.get_size_compare_answer(inputs)
-            except:
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('size_choice'):
-            try:
-                generated_text = self.get_size_choice_answer(inputs)
-            except:
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('location_choice'):
-            try:
-                generated_text = self.get_location_choice_answer(inputs)
-            except:
-                return 'ERROR!!!'
         elif self.eval_mode.startswith('mask_FT'):
             try:
                 generated_text = self.get_mask_FT_answer(inputs)
@@ -96,47 +66,6 @@ class INSTRUCTBLIP_FLANT5():
         return generated_text
 
 
-    def get_single_choice_anwser(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'above_content':
-                'below_content: 
-                'images': [
-                    
-                ]
-                'temple_img': 
-                'temple_txt': 
-            }
-        """
-        temple_txt = inputs['temple_txt']
-        temple_img = inputs['temple_img']
-        if self.support_multi_image:
-            raise NotImplementedError
-        else:
-            text_prompt = temple_txt + inputs['above_content'] + '\n' + inputs['below_content'] + '\n' + temple_img
-            inputs = self.prepare_prompt(inputs['images'], text_prompt)
-            return self.get_parsed_output(inputs)
-
-
-    def get_flow_insert_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'paragraphs': 
-                'image': 
-                'temple_img': 
-                'temple_txt': 
-            }
-        """
-        temple_txt = inputs['temple_txt']
-        temple_img = inputs['temple_img']
-        if self.support_multi_image:
-            raise NotImplementedError
-        else:
-            text_prompt = temple_txt + inputs['paragraphs'] + '\n' + temple_img
-            inputs = self.prepare_prompt(inputs['image'], text_prompt)
-            return self.get_parsed_output(inputs)
         
     def get_VQA_answer(self, inputs: dict) -> str:
         """
@@ -150,38 +79,6 @@ class INSTRUCTBLIP_FLANT5():
             raise NotImplementedError
         else:
             text_prompt = inputs['question']
-            inputs = self.prepare_prompt(inputs['image'], text_prompt)
-            return self.get_parsed_output(inputs)
-        
-    def get_location_choice_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'question': 
-                'image': 
-            }
-        """
-        additional_prompt = 'Please note that your answer must be "A" or "B" or "C" or "D".'
-        if self.support_multi_image:
-            raise NotImplementedError
-        else:
-            text_prompt = inputs['question'] + additional_prompt
-            inputs = self.prepare_prompt(inputs['image'], text_prompt)
-            return self.get_parsed_output(inputs)
-        
-    def get_size_choice_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'question': 
-                'image': 
-            }
-        """
-        additional_prompt = 'Please note that your answer must be "A" or "B" or "C" or "D".'
-        if self.support_multi_image:
-            raise NotImplementedError
-        else:
-            text_prompt = inputs['question'] + additional_prompt
             inputs = self.prepare_prompt(inputs['image'], text_prompt)
             return self.get_parsed_output(inputs)
         
@@ -263,22 +160,6 @@ class INSTRUCTBLIP_FLANT5():
             inputs = self.prepare_prompt(inputs['image_list'], text_prompt+"")
             return self.get_parsed_output(inputs)
         
-    def get_size_compare_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'question': 
-                'image_list': 
-            }
-        """
-        additional_prompt = 'Please note that your answer must be "A" or "B".'
-        if self.support_multi_image:
-            raise NotImplementedError
-        else:
-            text_prompt = inputs['question']+additional_prompt
-            inputs = self.prepare_prompt(inputs['image_list'], text_prompt)
-            return self.get_parsed_output(inputs)
-          
         
     def prepare_prompt(self, image_links: List = [], text_prompt: str = ""):
         if type(image_links) == str:

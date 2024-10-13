@@ -29,22 +29,7 @@ class MiniCPMV():
 
         
     def __call__(self, inputs: dict) -> str:
-        if self.eval_mode.startswith('single_choice'):
-            try:
-                generated_text = self.get_single_choice_anwser(inputs)
-            except:
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('flow_insert'):
-            try:
-                generated_text = self.get_flow_insert_answer(inputs)
-            except:
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('fake_news'):
-            try:
-                generated_text = self.get_fake_news_answer(inputs)
-            except:
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('easy_VQA'):
+        if self.eval_mode.startswith('easy_VQA'):
             try:
                 generated_text = self.get_VQA_answer(inputs)
             except:
@@ -76,27 +61,9 @@ class MiniCPMV():
             except:
                 traceback.print_exc()
                 return 'ERROR!!!'
-        elif self.eval_mode.startswith('size_compare'):
-            try:
-                generated_text = self.get_size_compare_answer(inputs)
-            except:
-                traceback.print_exc()
-                return 'ERROR!!!'
         elif self.eval_mode.startswith('mask_FT'):
             try:
                 generated_text = self.get_mask_FT_answer(inputs)
-            except:
-                traceback.print_exc()
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('size_choice'):
-            try:
-                generated_text = self.get_size_choice_answer(inputs)
-            except:
-                traceback.print_exc()
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('location_choice'):
-            try:
-                generated_text = self.get_location_choice_answer(inputs)
             except:
                 traceback.print_exc()
                 return 'ERROR!!!'
@@ -104,102 +71,7 @@ class MiniCPMV():
             raise NotImplementedError
         return generated_text
 
-    def get_single_choice_anwser(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'above_content':
-                'below_content: 
-                'images': [
-                    
-                ]
-                'temple_img': 
-                'temple_txt': 
-            }
-        """
-        temple_txt = inputs['temple_txt']
-        temple_img = inputs['temple_img']
-        if self.support_multi_image:
-            content = []
-            text_prompt = temple_txt + inputs['above_content'] + '\n' + inputs['below_content']
-            content.append(text_prompt)
-            for img in inputs["images"]:
-                if isinstance(img, str): img = load_image(img)
-                elif isinstance(img, Image.Image): pass
-                else: raise ValueError("Invalid image input", img, "should be str or PIL.Image.Image")
-                content.append(img)
-            content.append(temple_img)
-            messages = [{"role": "user", "content": content}]
-            res = self.model.chat(
-                image=None,
-                msgs=messages,
-                tokenizer=self.tokenizer,
-                sampling=False, # if sampling=False, beam_search will be used by default
-            )
-            return res
-        else:
-            raise NotImplementedError
-        
-    def get_flow_insert_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'paragraphs': 
-                'image': 
-                'temple_img': 
-                'temple_txt': 
-            }
-        """
-        temple_txt = inputs['temple_txt']
-        temple_img = inputs['temple_img']
-        if self.support_multi_image:
-            content = []
-            text_prompt = temple_txt + inputs['paragraphs']
-            content.append(text_prompt)
-            if isinstance(inputs["image"], str): img = load_image(inputs["image"])
-            elif isinstance(inputs["image"], Image.Image): img = inputs["image"]
-            else: raise ValueError("Invalid image input", inputs["image"], "should be str or PIL.Image.Image")
-            content.append(img)
-            content.append(temple_img)
-            messages = [{"role": "user", "content": content}]
-            res = self.model.chat(
-                image=None,
-                msgs=messages,
-                tokenizer=self.tokenizer,
-                sampling=False, # if sampling=False, beam_search will be used by default
-            )
-            return res
-        else:
-            raise NotImplementedError
-        
-    def get_fake_news_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'text': 
-                'image': 
-            }
-        """  
-        temple_img = "Does the above news article with image and text contain fake content? You only need to answer yes or no."
-        if self.support_multi_image:
-            content = []
-            text_prompt = inputs['text']
-            content.append(text_prompt)
-            if isinstance(inputs["image"], str): img = load_image(inputs["image"])
-            elif isinstance(inputs["image"], Image.Image): img = inputs["image"]
-            else: raise ValueError("Invalid image input", inputs["image"], "should be str or PIL.Image.Image")
-            content.append(img)
-            content.append(temple_img)          
-            messages = [{"role": "user", "content": content}]
-            res = self.model.chat(
-                image=None,
-                msgs=messages,
-                tokenizer=self.tokenizer,
-                sampling=False, # if sampling=False, beam_search will be used by default
-            )
-            return res
-        else:
-            raise NotImplementedError
+
             
     def get_VQA_answer(self, inputs: dict) -> str:
         """
@@ -366,34 +238,6 @@ class MiniCPMV():
         else:
             raise NotImplementedError
         
-    def get_size_compare_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'question': 
-                'image_list': 
-            }
-        """  
-        if self.support_multi_image:
-            content = []
-            text_prompt = "In the following two images, each contains a camouflaged creature. Please compare the relative area size that each camouflaged creature occupies in its respective image, and identify which creature occupies a larger relative area within the image. The comparison is based on the proportion of the area that the creature occupies in the image, not the actual size of the creature itself.You need to respond with the label of the image [A,B] and do not give any explanations\n"
-            content.append(text_prompt)
-            for image in inputs['image_list']:
-                if isinstance(image, str): img = load_image(image)
-                elif isinstance(image, Image.Image): img = image
-                else: raise ValueError("Invalid image input", image, "should be str or PIL.Image.Image")
-                content.append(img)
-         
-            messages = [{"role": "user", "content": content}]
-            res = self.model.chat(
-                image=None,
-                msgs=messages,
-                tokenizer=self.tokenizer,
-                sampling=False, # if sampling=False, beam_search will be used by default
-            )
-            return res
-        else:
-            raise NotImplementedError
     def get_mask_FT_answer(self, inputs: dict) -> str:
         """
         Args:
@@ -410,62 +254,6 @@ class MiniCPMV():
                 elif isinstance(image, Image.Image): img = image
                 else: raise ValueError("Invalid image input", image, "should be str or PIL.Image.Image")
                 content.append(img)
-         
-            messages = [{"role": "user", "content": content}]
-            res = self.model.chat(
-                image=None,
-                msgs=messages,
-                tokenizer=self.tokenizer,
-                sampling=False, # if sampling=False, beam_search will be used by default
-            )
-            return res
-        else:
-            raise NotImplementedError
-
-
-    def get_location_choice_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'question': 
-                'image': 
-            }
-        """  
-        if self.support_multi_image:
-            content = []
-            text_prompt = inputs['question']
-            content.append(text_prompt)
-            if isinstance(inputs["image"], str): img = load_image(inputs["image"])
-            elif isinstance(inputs["image"], Image.Image): img = inputs["image"]
-            else: raise ValueError("Invalid image input", inputs["image"], "should be str or PIL.Image.Image")
-            content.append(img)
-         
-            messages = [{"role": "user", "content": content}]
-            res = self.model.chat(
-                image=None,
-                msgs=messages,
-                tokenizer=self.tokenizer,
-                sampling=False, # if sampling=False, beam_search will be used by default
-            )
-            return res
-        else:
-            raise NotImplementedError
-    def get_size_choice_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'question': 
-                'image': 
-            }
-        """  
-        if self.support_multi_image:
-            content = []
-            text_prompt = inputs['question']
-            content.append(text_prompt)
-            if isinstance(inputs["image"], str): img = load_image(inputs["image"])
-            elif isinstance(inputs["image"], Image.Image): img = inputs["image"]
-            else: raise ValueError("Invalid image input", inputs["image"], "should be str or PIL.Image.Image")
-            content.append(img)
          
             messages = [{"role": "user", "content": content}]
             res = self.model.chat(

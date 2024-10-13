@@ -23,22 +23,7 @@ class Idefics1():
 
         
     def __call__(self, inputs: dict) -> str:
-        if self.eval_mode.startswith('single_choice'):
-            try:
-                generated_text = self.get_single_choice_anwser(inputs)
-            except:
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('flow_insert'):
-            try:
-                generated_text = self.get_flow_insert_answer(inputs)
-            except:
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('fake_news'):
-            try:
-                generated_text = self.get_fake_news_answer(inputs)
-            except:
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('easy_VQA'):
+        if self.eval_mode.startswith('easy_VQA'):
             try:
                 generated_text = self.get_VQA_answer(inputs)
             except:
@@ -53,11 +38,6 @@ class Idefics1():
                 generated_text = self.get_bbox_answer(inputs)
             except:
                 return 'ERROR!!!'
-        elif self.eval_mode.startswith('count_num'):
-            try:
-                generated_text = self.get_count_num_answer(inputs)
-            except:
-                return 'ERROR!!!'
         elif self.eval_mode.startswith('count_choice'):
             try:
                 generated_text = self.get_count_choice_answer(inputs)
@@ -69,24 +49,6 @@ class Idefics1():
             except:
                 traceback.print_exc()
                 return 'ERROR!!!'
-        elif self.eval_mode.startswith('size_compare'):
-            try:
-                generated_text = self.get_size_compare_answer(inputs)
-            except:
-                traceback.print_exc()
-                return 'ERROR!!!' 
-        elif self.eval_mode.startswith('size_choice'):
-            try:
-                generated_text = self.get_size_choice_answer(inputs)
-            except:
-                traceback.print_exc()
-                return 'ERROR!!!' 
-        elif self.eval_mode.startswith('location_choice'):
-            try:
-                generated_text = self.get_location_choice_answer(inputs)
-            except:
-                traceback.print_exc()
-                return 'ERROR!!!' 
         elif self.eval_mode.startswith('mask_FT'):
             try:
                 generated_text = self.get_mask_FT_answer(inputs)
@@ -102,61 +64,6 @@ class Idefics1():
             raise NotImplementedError
         return generated_text
 
-
-    def get_single_choice_anwser(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'above_content':
-                'below_content: 
-                'images': [
-                    
-                ]
-                'temple_img': 
-                'temple_txt': 
-            }
-        """
-        temple_txt = inputs['temple_txt']
-        temple_img = inputs['temple_img']
-        if self.support_multi_image:
-            prompt = ["USER: "] + [temple_txt , inputs['above_content'] , '\n' , inputs['below_content']]
-            for img in inputs['images']:
-                prompt.append(img)
-            prompt += [temple_img, "<end_of_utterance>", "\nAssistant:"]
-            inputs = self.processor([prompt], return_tensors="pt").to(self.model.device)
-            bad_words_ids = self.processor.tokenizer(["<image>", "<fake_token_around_image>"], add_special_tokens=False).input_ids
-            generated_ids = self.model.generate(**inputs, bad_words_ids=bad_words_ids, max_new_tokens=256)
-            generated_text = self.processor.batch_decode(generated_ids[:, inputs['input_ids'].shape[1]:], skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
-
-            return generated_text
-        else:
-            raise NotImplementedError
-        
-
-    def get_flow_insert_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'paragraphs': 
-                'image': 
-                'temple_img': 
-                'temple_txt': 
-            }
-        """
-        temple_txt = inputs['temple_txt']
-        temple_img = inputs['temple_img']
-        if self.support_multi_image:
-            prompt = ["USER: "]
-            prompt += [temple_txt , inputs['paragraphs'] , '\n' , inputs['image']]
-            prompt += [temple_img , "<end_of_utterance>", "\nAssistant:"]
-            inputs = self.processor([prompt], return_tensors="pt").to(self.model.device)
-            bad_words_ids = self.processor.tokenizer(["<image>", "<fake_token_around_image>"], add_special_tokens=False).input_ids
-            generated_ids = self.model.generate(**inputs, bad_words_ids=bad_words_ids, max_new_tokens=256)
-            generated_text = self.processor.batch_decode(generated_ids[:, inputs['input_ids'].shape[1]:], skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
-
-            return generated_text
-        else:
-            raise NotImplementedError
         
     def get_VQA_answer(self, inputs: dict) -> str:
         """
@@ -246,83 +153,6 @@ class Idefics1():
             return first_answer
         else:
             raise NotImplementedError
-    def get_size_choice_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'question': 
-                'image': 
-            }
-        """
-        additional_pprompt = "\nPlease note that your answer must be in A,B,C,D"
-        if self.support_multi_image:
-            prompt = ["USER: "]
-            prompt += [inputs['question'] + additional_pprompt, '\n' , inputs['image']]
-            prompt += ["<end_of_utterance>", "\nAssistant:"]
-            inputs = self.processor([prompt], return_tensors="pt").to(self.model.device)
-            bad_words_ids = self.processor.tokenizer(["<image>", "<fake_token_around_image>"], add_special_tokens=False).input_ids
-            generated_ids = self.model.generate(**inputs, bad_words_ids=bad_words_ids, max_new_tokens=256)
-            generated_text = self.processor.batch_decode(generated_ids[:, inputs['input_ids'].shape[1]:], skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
-            print(generated_text)
-            if "'A'" in generated_text or " A " in generated_text or " A." in generated_text or 'first' in generated_text:
-                generated_text = "A"
-            elif "'B'" in generated_text or " B " in generated_text or " B." in generated_text or 'second' in generated_text:
-                generated_text = "B"
-            elif "'C'" in generated_text or " C " in generated_text or " C." in generated_text or 'third' in generated_text:
-                generated_text = "C"
-            elif "'D'" in generated_text or " D " in generated_text or " D. " in generated_text or 'fourth' in generated_text:
-                generated_text = "D"
-
-            return generated_text
-        else:
-            raise NotImplementedError
-    def get_location_choice_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'question': 
-                'image': 
-            }
-        """
-        additional_pprompt = "\nPlease note that your answer must be in A,B,C,D"
-        if self.support_multi_image:
-            prompt = ["USER: "]
-            prompt += [inputs['question']+additional_pprompt , '\n' , inputs['image']]
-            prompt += ["<end_of_utterance>", "\nAssistant:"]
-            inputs = self.processor([prompt], return_tensors="pt").to(self.model.device)
-            bad_words_ids = self.processor.tokenizer(["<image>", "<fake_token_around_image>"], add_special_tokens=False).input_ids
-            generated_ids = self.model.generate(**inputs, bad_words_ids=bad_words_ids, max_new_tokens=256)
-            generated_text = self.processor.batch_decode(generated_ids[:, inputs['input_ids'].shape[1]:], skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
-
-            if "'A'" in generated_text or " A " in generated_text or " A." in generated_text or 'first' in generated_text:
-                generated_text = "A"
-            elif "'B'" in generated_text or " B " in generated_text or " B." in generated_text or 'second' in generated_text:
-                generated_text = "B"
-            elif "'C'" in generated_text or " C " in generated_text or " C." in generated_text or 'third' in generated_text:
-                generated_text = "C"
-            elif "'D'" in generated_text or " D " in generated_text or " D. " in generated_text or 'fourth' in generated_text:
-                generated_text = "D"
-
-            return generated_text
-        else:
-            raise NotImplementedError
-
-    def get_count_num_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'question': 
-                'image': 
-            }
-        """
-        if self.support_multi_image:
-            prompt = ["USER: "]
-            prompt += [inputs['question'] , '\n' , inputs['image']]
-            prompt += ["<end_of_utterance>", "\nAssistant:"]
-            inputs = self.processor([prompt], return_tensors="pt").to(self.model.device)
-            bad_words_ids = self.processor.tokenizer(["<image>", "<fake_token_around_image>"], add_special_tokens=False).input_ids
-            generated_ids = self.model.generate(**inputs, bad_words_ids=bad_words_ids, max_new_tokens=256)
-            
             
     def get_general_answer(self, inputs: dict) -> str:
         """
@@ -368,6 +198,8 @@ class Idefics1():
             return generated_text
         else:
             raise NotImplementedError
+
+
     def get_mask_FT_answer(self, inputs: dict) -> str:
         """
         Args:
@@ -387,32 +219,6 @@ class Idefics1():
             generated_ids = self.model.generate(**inputs, bad_words_ids=bad_words_ids, max_new_tokens=256)
             generated_text = self.processor.batch_decode(generated_ids[:, inputs['input_ids'].shape[1]:], skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
 
-            return generated_text
-        else:
-            raise NotImplementedError
-    def get_size_compare_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'question': 
-                'image_list': 
-            }
-        """
-        if self.support_multi_image:
-            additional_prompt = "\nPlease note that your answer must be 'A' or 'B'"
-            prompt = ["USER: "]
-            prompt += [inputs['question'] + additional_prompt, '\n' ]
-            for img in inputs['image_list']:
-                prompt.append(img)
-            prompt += ["<end_of_utterance>", "\nAssistant:"]
-            inputs = self.processor([prompt], return_tensors="pt").to(self.model.device)
-            bad_words_ids = self.processor.tokenizer(["<image>", "<fake_token_around_image>"], add_special_tokens=False).input_ids
-            generated_ids = self.model.generate(**inputs, bad_words_ids=bad_words_ids, max_new_tokens=256)
-            generated_text = self.processor.batch_decode(generated_ids[:, inputs['input_ids'].shape[1]:], skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
-            if "'A'" in generated_text or " A " in generated_text or " A." in generated_text or 'first' in generated_text:
-                generated_text = "A"
-            elif "'B'" in generated_text or " B " in generated_text or " B." in generated_text or 'second' in generated_text:
-                generated_text = "B"
             return generated_text
         else:
             raise NotImplementedError

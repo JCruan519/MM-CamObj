@@ -23,22 +23,7 @@ class QwenVL():
         self.eval_mode = eval_mode
     
     def __call__(self, inputs: dict) -> str:
-        if self.eval_mode.startswith('single_choice'):
-            try:
-                generated_text = self.get_single_choice_anwser(inputs)
-            except:
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('flow_insert'):
-            try:
-                generated_text = self.get_flow_insert_answer(inputs)
-            except:
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('fake_news'):
-            try:
-                generated_text = self.get_fake_news_answer(inputs)
-            except:
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('easy_VQA'):
+        if self.eval_mode.startswith('easy_VQA'):
             try:
                 generated_text = self.get_VQA_answer(inputs)
             except:
@@ -70,27 +55,9 @@ class QwenVL():
             except:
                 traceback.print_exc()
                 return 'ERROR!!!'
-        elif self.eval_mode.startswith('size_compare'):
-            try:
-                generated_text = self.get_size_compare_answer(inputs)
-            except:
-                traceback.print_exc()
-                return 'ERROR!!!'
         elif self.eval_mode.startswith('mask_FT'):
             try:
                 generated_text = self.get_mask_FT_answer(inputs)
-            except:
-                traceback.print_exc()
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('size_choice'):
-            try:
-                generated_text = self.get_size_choice_answer(inputs)
-            except:
-                traceback.print_exc()
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('location_choice'):
-            try:
-                generated_text = self.get_location_choice_answer(inputs)
             except:
                 traceback.print_exc()
                 return 'ERROR!!!'
@@ -98,71 +65,7 @@ class QwenVL():
             raise NotImplementedError
         return generated_text
         
-    def get_single_choice_anwser(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'above_content':
-                'below_content: 
-                'images': [
-                    
-                ]
-                'temple_img': 
-                'temple_txt': 
-            }
-        """
-        temple_txt = inputs['temple_txt']
-        temple_img = inputs['temple_img']
-        if self.support_multi_image:
-            raise NotImplementedError
-        else:
-            text_prompt = temple_txt + inputs['above_content'] + '\n' + inputs['below_content']
-            text_prompt = text_prompt + temple_img
-            inputs = self.prepare_prompt(inputs['images'], text_prompt)
-            # Generate
-            generated_text = self.get_parsed_output(inputs)
-            return generated_text
-        
-    def get_flow_insert_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'paragraphs': 
-                'image': 
-                'temple_img': 
-                'temple_txt': 
-            }
-        """
-        temple_txt = inputs['temple_txt']
-        temple_img = inputs['temple_img']
-        if self.support_multi_image:
-            raise NotImplementedError
-        else:
-            text_prompt = temple_txt + inputs['paragraphs']
-            text_prompt = text_prompt + "\n<image>\n" + temple_img
-            inputs = self.prepare_prompt(inputs['image'], text_prompt)
-            # Generate
-            generated_text = self.get_parsed_output(inputs)
-            return generated_text
-        
-    def get_fake_news_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'text': 
-                'image': 
-            }
-        """  
-        temple_img = "Does the above news article with image and text contain fake content? You only need to answer yes or no."
-        if self.support_multi_image:
-            raise NotImplementedError
-        else:
-            text_prompt = inputs['text'] + "\n<image>\n" + temple_img
-            inputs = self.prepare_prompt(inputs['image'], text_prompt)
-            # Generate
-            generated_text = self.get_parsed_output(inputs)
-            return generated_text
-    
+
     def get_VQA_answer(self, inputs: dict) -> str:
         """
         Args:
@@ -181,42 +84,6 @@ class QwenVL():
             # Generate
             generated_text = self.get_parsed_output(inputs)
             return generated_text 
-    def get_size_choice_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'question': 
-                'image': 
-            }
-        """
-
-        if self.support_multi_image:
-            raise NotImplementedError
-        else:
-            text_prompt = inputs['question']
-            text_prompt = text_prompt
-            inputs = self.prepare_prompt(inputs['image'], text_prompt)
-            # Generate
-            generated_text = self.get_parsed_output(inputs)
-            return generated_text   
-    def get_location_choice_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'question': 
-                'image': 
-            }
-        """
-
-        if self.support_multi_image:
-            raise NotImplementedError
-        else:
-            text_prompt = inputs['question']
-            text_prompt = text_prompt
-            inputs = self.prepare_prompt(inputs['image'], text_prompt)
-            # Generate
-            generated_text = self.get_parsed_output(inputs)
-            return generated_text   
           
     def get_general_answer(self, inputs: dict) -> str:
         """
@@ -284,26 +151,6 @@ class QwenVL():
             generated_text = self.get_parsed_output(inputs)
             print(generated_text)
             return str(self.parse_and_normalize_bbox(generated_text)) 
-        
-    def get_fake_news_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'question': 
-                'image': 
-            }
-        """
-
-        if self.support_multi_image:
-            raise NotImplementedError
-        else:
-            text_prompt = inputs['question']
-            text_prompt = text_prompt
-            inputs = self.prepare_prompt(inputs['image'], text_prompt)
-            # Generate
-            generated_text = self.get_parsed_output(inputs)
-            print(generated_text)
-            return str(self.parse_and_normalize_bbox(generated_text))
           
           
     def get_count_answer(self, inputs: dict) -> str:
@@ -346,24 +193,6 @@ class QwenVL():
             return generated_text   
           
           
-    def get_size_compare_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'question': 
-                'image_list': 
-            }
-        """
-        prompt = "In the following two images, each contains a camouflaged creature. Please compare the relative area size that each camouflaged creature occupies in its respective image, and identify which creature occupies a larger relative area within the image. The comparison is based on the proportion of the area that the creature occupies in the image, not the actual size of the creature itself.\n**IMPORTANT**1.Your answer should be just one letter in [A, B]2.Don't interpret your answer in any way"
-        if self.support_multi_image:
-            raise NotImplementedError
-        else:
-            text_prompt = inputs['question']
-            text_prompt = text_prompt
-            inputs = self.prepare_prompt(inputs['image_list'], prompt)
-            # Generate
-            generated_text = self.get_parsed_output(inputs)
-            return generated_text   
     def get_mask_FT_answer(self, inputs: dict) -> str:
         """
         Args:
@@ -372,7 +201,6 @@ class QwenVL():
                 'image_list': 
             }
         """
-        # prompt = "In the following two images, each contains a camouflaged creature. Please compare the relative area size that each camouflaged creature occupies in its respective image, and identify which creature occupies a larger relative area within the image. The comparison is based on the proportion of the area that the creature occupies in the image, not the actual size of the creature itself.\n**IMPORTANT**1.Your answer should be just one letter in [A, B]2.Don't interpret your answer in any way"
         if self.support_multi_image:
             raise NotImplementedError
         else:

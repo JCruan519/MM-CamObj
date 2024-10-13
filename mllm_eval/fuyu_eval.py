@@ -26,22 +26,7 @@ class Fuyu():
         self.eval_mode = eval_mode
     
     def __call__(self, inputs: dict) -> str:
-        if self.eval_mode.startswith('single_choice'):
-            try:
-                generated_text = self.get_single_choice_anwser(inputs)
-            except:
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('flow_insert'):
-            try:
-                generated_text = self.get_flow_insert_answer(inputs)
-            except:
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('fake_news'):
-            try:
-                generated_text = self.get_fake_news_answer(inputs)
-            except:
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('easy_VQA'):
+        if  self.eval_mode.startswith('easy_VQA'):
             try:
                 generated_text = self.get_VQA_answer(inputs)
             except:
@@ -67,26 +52,11 @@ class Fuyu():
                 generated_text = self.get_mask_match_answer(inputs)
             except:
                 return 'ERROR!!!'
-        elif self.eval_mode.startswith('size_compare'):
-            try:
-                generated_text = self.get_size_compare_answer(inputs)
-            except:
-                return 'ERROR!!!'
         elif self.eval_mode.startswith('mask_FT'):
             try:
                 generated_text = self.get_mask_FT_answer(inputs)
             except:
                 return 'ERROR!!!'
-        elif self.eval_mode.startswith('size_choice'):
-            try:
-                generated_text = self.get_size_choice_answer(inputs)
-            except:
-                return 'ERROR!!!'
-        elif self.eval_mode.startswith('location_choice'):
-            try:
-                generated_text = self.get_location_choice_answer(inputs)
-            except:
-                return 'ERROR!!!'   
         elif self.eval_mode.startswith('VQA') or self.eval_mode.startswith('image_cap'):
             try:
                 generated_text = self.get_general_answer(inputs)
@@ -252,21 +222,6 @@ class Fuyu():
             text_prompt = inputs['question']
             inputs = self.prepare_prompt(inputs['image_list'], text_prompt)
             return self.get_parsed_output(inputs)
-    def get_size_compare_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'question': 
-                'image_list': 
-            }
-        """
-        if self.support_multi_image:    
-            raise NotImplementedError
-        else:
-            text_prompt = "In the following two images labeled[A,B], each contains a camouflaged creature. Please compare the relative area size that each camouflaged creature occupies in its respective image, and identify which creature occupies a larger relative area within the image. The comparison is based on the proportion of the area that the creature occupies in the image, not the actual size of the creature itself.\n**IMPORTENT**Your answer mast only be A or B and do not give any explanations\n"
-            # text_prompt = inputs['question']
-            inputs = self.prepare_prompt(inputs['image_list'], text_prompt)
-            return self.get_parsed_output(inputs)
     def get_mask_FT_answer(self, inputs: dict) -> str:
         """
         Args:
@@ -280,34 +235,6 @@ class Fuyu():
         else:
             text_prompt = inputs['question']
             inputs = self.prepare_prompt(inputs['image_list'], text_prompt)
-            return self.get_parsed_output(inputs)
-    def get_location_choice_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'question': 
-                'image': 
-            }
-        """
-        if self.support_multi_image:
-            raise NotImplementedError
-        else:
-            text_prompt = inputs['question']
-            inputs = self.prepare_prompt(inputs['image'], text_prompt)
-            return self.get_parsed_output(inputs)
-    def get_size_choice_answer(self, inputs: dict) -> str:
-        """
-        Args:
-            inputs : {
-                'question': 
-                'image': 
-            }
-        """
-        if self.support_multi_image:
-            raise NotImplementedError
-        else:
-            text_prompt = inputs['question']
-            inputs = self.prepare_prompt(inputs['image'], text_prompt)
             return self.get_parsed_output(inputs)
     def prepare_prompt(self, image_links: List = [], text_prompt: str = ""):
         if type(image_links) == str:
