@@ -1,8 +1,6 @@
 # MM-CamObj
 **(ARXIV24)** This is the official code repository for *"MM-CamObj: A Comprehensive Multimodal Dataset for Camouflaged Object Scenarios."*
 
-## Code and datasets will be released soon.
-
 ## Dataset
 - Collected by Fan *et al.*: [SINet-V2](https://github.com/GewelsJI/SINet-V2)
   - **COD10K**: [Download COD10K](https://drive.google.com/file/d/1M8-Ivd33KslvyehLK9_IUBGJ_Kf52bWG/view?usp=sharing)
