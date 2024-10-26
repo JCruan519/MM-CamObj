@@ -23,5 +23,5 @@ To use the dataset, download the files and place them in the `dataset/data/` dir
    - `MM-CamObj/camobjbench/eval_GPT4o/questions`
    - `MM-CamObj/camobjbench/eval_GPT4o_mini/questions`
 
-   
-
+## Acknowledgement
+Thanks to the open-source code from [Mantis](https://tiger-ai-lab.github.io/Mantis/)
