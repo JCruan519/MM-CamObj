@@ -658,7 +658,7 @@ def main(
     elif eval_mode.startswith('image_cap'):
         model_bge = Visualized_BGE(
             model_name_bge='BAAI/bge-base-en-v1.5', 
-            model_weight='/mnt/share/models/huggingface/rjc/models/BAAI/bge-visualized/Visualized_base_en_v1.5.pth'
+            model_weight='BAAI/bge-visualized/Visualized_base_en_v1.5.pth'
         ).cuda()
         results_dict = eval_image_cap(benchmark_data, benchmark_root_path, model, model_bge)
         json_path = os.path.join(results_dir, 'results.json')

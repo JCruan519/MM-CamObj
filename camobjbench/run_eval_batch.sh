@@ -12,14 +12,14 @@ model_name_list=(
 
 # Define the list of model paths
 model_path_list=(
-    '/mnt/share/models/huggingface/rjc/models/llava-hf/llava-1.5-7b-hf'
-    '/mnt/share/models/huggingface/rjc/models/llava-hf/llava-1.5-13b-hf'
-    '/mnt/share/models/huggingface/rjc/models/Qwen/Qwen-VL-Chat'
-    '/mnt/share/models/huggingface/rjc/models/openbmb/MiniCPM-Llama3-V-2_5'
-    '/mnt/share/models/huggingface/rjc/models/Salesforce/instructblip-flan-t5-xxl'
-    '/mnt/share/models/huggingface/rjc/models/adept/fuyu-8b'
-    '/mnt/share/models/huggingface/rjc/models/microsoft/kosmos-2-patch14-224'
-    '/mnt/share/models/huggingface/rjc/models/HuggingFaceM4/idefics-9b-instruct'
+    'llava-hf/llava-1.5-7b-hf'
+    'llava-hf/llava-1.5-13b-hf'
+    'Qwen/Qwen-VL-Chat'
+    'openbmb/MiniCPM-Llama3-V-2_5'
+    'Salesforce/instructblip-flan-t5-xxl'
+    'adept/fuyu-8b'
+    'microsoft/kosmos-2-patch14-224'
+    'HuggingFaceM4/idefics-9b-instruct'
 )
 
 # Define the list of evaluation modes
@@ -34,14 +34,14 @@ eval_mode_list=(
 )
 
 # Define paths for datasets and image directory
-easy_vqa_dataset_path='/mnt/share/models/huggingface/rjc/camobj_bench/benchmark/questions/easy_VQA_questions/data/easy_vqa.jsonl'
-hard_vqa_dataset_path='/mnt/share/models/huggingface/rjc/camobj_bench/benchmark/questions/hard_VQA_questions/data/hard_vqa.jsonl'
-img_cap_dataset_path='/mnt/share/models/huggingface/rjc/camobj_bench/benchmark/camobj_bench_image_caption.json'
-count_choice_dataset_path='/mnt/share/models/huggingface/rjc/camobj_bench/benchmark/questions/count_choice/data/count_choice.jsonl'
-mask_ft_dataset_path='/mnt/share/models/huggingface/rjc/camobj_bench/benchmark/questions/mask_FT/data/mask_ft.jsonl'
-mask_match_dataset_path='/mnt/share/models/huggingface/rjc/camobj_bench/benchmark/questions/mask_match/data/mask_match.jsonl'
-bbox_without_name_dataset_path='/mnt/share/models/huggingface/rjc/camobj_bench/benchmark/questions/bbox_without_name/data/bbox_without_name.jsonl'
-img_path='/mnt/share/models/huggingface/rjc/camobj_bench'
+easy_vqa_dataset_path='dataset/questions/easy_vqa.jsonl'
+hard_vqa_dataset_path='dataset/questions/hard_vqa.jsonl'
+img_cap_dataset_path='dataset/questions/image_caption.json'
+count_choice_dataset_path='dataset/questions/object_count.jsonl'
+mask_ft_dataset_path='dataset/questions/mask_FT.jsonl'
+mask_match_dataset_path='dataset/questions/mask_matching.jsonl'
+bbox_without_name_dataset_path='dataset/questions/bbox_position.jsonl'
+img_path='dataset'
 
 # Loop through the eval modes
 for eval_mode in "${eval_mode_list[@]}"; do
@@ -68,12 +68,12 @@ for eval_mode in "${eval_mode_list[@]}"; do
         export CUDA_VISIBLE_DEVICES=$i
 
         # Run the Python script in the background for each model
-        python eval_mllm.py \
-            --model_name "${model_name_list[$i]}" \
-            --model_path "${model_path_list[$i]}" \
-            --dataset_path ${dataset_path} \
-            --img_path ${img_path} \
-            --results_dir /mnt/share/models/huggingface/rjc/camobj_bench/eval_res \
+        python eval_mllm.py /
+            --model_name "${model_name_list[$i]}" /
+            --model_path "${model_path_list[$i]}" /
+            --dataset_path ${dataset_path} /
+            --img_path ${img_path} /
+            --results_dir eval_res /
             --eval_mode ${eval_mode} &
     done
 

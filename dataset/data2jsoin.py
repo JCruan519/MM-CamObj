@@ -6,7 +6,7 @@ import json
 
 total_list = []
 data_path = "data"
-write_path = 'images.json'
+write_path = 'metadata.json'
 total_list = total_list+process_COD10K_v3(data_path+"/COD10K-v3") + process_PlantCAMO1250(data_path+"/PlantCAMO1250")+process_MoCA_Video(data_path+"/MoCA_Video")+process_CamouflageData(data_path+"/CamouflageData")
 print(len(total_list))
 for i,data in enumerate(total_list):
